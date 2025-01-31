@@ -11,6 +11,9 @@ spec:
     targetRevision: main
     path: argo-infra/nginx-ingress/chart
     helm:
+      parameters:
+        - name: namespace
+          value: nginx-ingress
       valueFiles:
         - values.yaml
   destination:
