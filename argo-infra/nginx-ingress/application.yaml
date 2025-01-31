@@ -8,14 +8,15 @@ spec:
   project: infra
   source:
     repoURL: https://kubernetes.github.io/ingress-nginx
-    targetRevision: latest
-    chart: ingress-nginx
+    targetRevision: main
+    path: argo-infra/nginx-ingress/chart
     helm:
       valueFiles:
         - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: nginx-ingress
+    name: nginx-ingress
   syncPolicy:
     automated:
       prune: true
