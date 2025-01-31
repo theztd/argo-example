@@ -1,2 +1,6 @@
-# argo-example
-ArgoCD example
+# ArgoCD example
+
+## Example
+
+
+Edit values you need to modify

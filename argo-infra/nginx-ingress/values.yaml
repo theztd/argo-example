@@ -1,0 +1,13 @@
+---
+controller:
+  replicaCount: 1
+  service:
+    type: HostPort
+  ingressClassResource:
+    name: nginx
+    enabled: true
+  admissionWebhooks:
+    enabled: true
+
+defaultBackend:
+  enabled: true
