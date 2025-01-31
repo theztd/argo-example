@@ -1,3 +1,4 @@
-installCRDs: true
-global:
-  logLevel: 2
+cert-manager:
+  installCRDs: true
+  global:
+    logLevel: 2
