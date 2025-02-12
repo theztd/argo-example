@@ -1,0 +1,44 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: argo-apps
+  namespace: argocd
+spec:
+  ignoreApplicationDifferences:
+    - jsonPointers:
+      - /spec/syncPolicy
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
+  generators:
+    - git:
+        repoURL: https://github.com/theztd/argo-example
+        revision: main
+        directories:
+          - path: argo-apps/*
+
+  template:
+    metadata:
+      name: '{{ index .path.segments 1 }}-{{ index .path.segments 2 }}'
+    spec:
+      project: apps
+      source:
+        repoURL: https://github.com/theztd/argo-example
+        targetRevision: main
+        path: 'argo-apps/{{ index .path.segments 1 }}/{{ index .path.segments 2 }}'
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{ index .path.segments 1 }}'
+
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+#          - ApplyOutOfSyncOnly=true
+          - Replace=true
+

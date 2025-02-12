@@ -1,0 +1,48 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: argo-infra
+  namespace: argocd
+spec:
+  ignoreApplicationDifferences:
+    - jsonPointers:
+      - /spec/syncPolicy
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=default
+  generators:
+    - git:
+        repoURL: https://github.com/theztd/argo-example
+        revision: devel
+        directories:
+          - path: argo-infra/*/*
+
+  template:
+    metadata:
+      name: '{{ index .path.segments 1 }}-{{ index .path.segments 2 }}'
+    spec:
+      project: infra
+      source:
+        repoURL: https://github.com/theztd/argo-example
+        targetRevision: main
+        path: 'argo-infra/{{ index .path.segments 1 }}/{{ index .path.segments 2 }}'
+        helm:
+          valueFiles:
+            - values.yaml
+
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{ index .path.segments 1 }}'
+
+      syncPolicy:
+        automated: {}
+#          prune: true
+#          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+#          - ApplyOutOfSyncOnly=true
+          - Replace=true
+
+
