@@ -1,0 +1,27 @@
+# Prepare manual rollback pipeline for new release
+
+name: Prepare Rollback Pipeline on Deploy
+
+on:
+  push:
+    branches:
+      - prod
+      - staging
+      - dev
+
+jobs:
+  prepare-rollback:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Generate Rollback Pipeline
+        run: |
+          echo "Rollback pipeline prepared for ${{ github.ref_name }}"
+          echo "Run rollback manually if needed"
+
+      - name: Save Rollback Reference
+        run: |
+          git tag rollback-${{ github.sha }}
+          git push origin rollback-${{ github.sha }}

@@ -1,0 +1,31 @@
+# Full Argo diff before release
+# argocd app diff ${{ github.ref_name }}
+
+name: ArgoCD Diff Before Deployment
+
+on:
+  pull_request:
+    branches:
+      - prod
+      - staging
+      - dev
+
+jobs:
+  argo-diff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install ArgoCD CLI
+        run: |
+          curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x /usr/local/bin/argocd
+
+      - name: Perform ArgoCD Diff
+        run: |
+          argocd login ${{ secrets.ARGOCD_SERVER }} --auth-token ${{ secrets.ARGOCD_AUTH_TOKEN }}
+          argocd app diff ${{ github.ref_name }}
+        env:
+          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+          ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}

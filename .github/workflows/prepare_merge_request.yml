@@ -1,0 +1,31 @@
+name: Create Merge Request to Environment Branch
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  create-merge-request:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Determine changed environment
+        id: env
+        run: |
+          CHANGED_ENV=$(git diff --name-only HEAD^ | grep -oP 'env/\K[^/]+' | sort -u | head -n 1)
+          if [ -n "$CHANGED_ENV" ]; then
+            echo "env=$CHANGED_ENV" >> $GITHUB_ENV
+          else
+            echo "No environment change detected. Skipping."
+            exit 0
+          fi
+
+      - name: Create Merge Request
+        if: env.env != ''
+        run: |
+          gh pr create --base ${{ env.env }} --head main --title "Deploy to ${{ env.env }}" --body "Automated MR for deploying to ${{ env.env }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
