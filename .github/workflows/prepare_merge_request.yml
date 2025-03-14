@@ -37,6 +37,8 @@ jobs:
               git push origin main:$ENV --force
             fi
           done
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Move environment files to apps/ and remove env/
         run: |
