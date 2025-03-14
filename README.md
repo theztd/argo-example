@@ -20,3 +20,4 @@ There are example scripts in ./init/ directory showing how to add automaticaly a
 └── project-infra.yaml
 ```
 
+## Structure and workflow
