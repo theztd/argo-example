@@ -25,6 +25,30 @@ jobs:
           echo "Changed environments: $CHANGED_ENVS"
           echo "envs=$CHANGED_ENVS" >> $GITHUB_ENV
 
+      - name: Ensure target branches exist and reset them
+        run: |
+          for ENV in ${{ env.envs }}; do
+            if ! git ls-remote --exit-code --heads origin $ENV; then
+              echo "Creating branch $ENV"
+              git branch $ENV main
+              git push origin $ENV
+            else
+              echo "Resetting branch $ENV to match main"
+              git push origin main:$ENV --force
+            fi
+          done
+
+      - name: Move environment files to apps/ and remove env/
+        run: |
+          for ENV in ${{ env.envs }}; do
+            mkdir -p apps/
+            mv env/$ENV/* apps/
+            rm -rf env/$ENV
+            git add apps/
+            git rm -rf env/$ENV
+            git commit -m "Move $ENV files to apps/ and remove env/$ENV"
+          done
+
       - name: Create Merge Requests
         if: env.envs != ''
         run: |
