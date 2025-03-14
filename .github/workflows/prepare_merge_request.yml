@@ -11,21 +11,26 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Determine changed environment
         id: env
         run: |
-          CHANGED_ENV=$(git diff --name-only HEAD^ | grep -oP 'env/\K[^/]+' | sort -u | head -n 1)
-          if [ -n "$CHANGED_ENV" ]; then
-            echo "env=$CHANGED_ENV" >> $GITHUB_ENV
-          else
+          CHANGED_ENVS=$(git diff --name-only origin/main...HEAD | grep -oP '^env/\K[^/]+' | sort -u | tr '\n' ' ')
+          if [ -z "$CHANGED_ENVS" ]; then
             echo "No environment change detected. Skipping."
             exit 0
           fi
+          echo "Changed environments: $CHANGED_ENVS"
+          echo "envs=$CHANGED_ENVS" >> $GITHUB_ENV
 
-      - name: Create Merge Request
-        if: env.env != ''
+      - name: Create Merge Requests
+        if: env.envs != ''
         run: |
-          gh pr create --base ${{ env.env }} --head main --title "Deploy to ${{ env.env }}" --body "Automated MR for deploying to ${{ env.env }}"
+          for ENV in ${{ env.envs }}; do
+            echo "Creating MR for environment: $ENV"
+            gh pr create --base "$ENV" --head main --title "Deploy to $ENV" --body "Automated MR for deploying to $ENV" || echo "Merge request already exists or failed"
+          done
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
