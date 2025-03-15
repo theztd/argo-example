@@ -29,6 +29,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install ArgoCD CLI
+        run: |
+          curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x /usr/local/bin/argocd
+
       - name: STAGE - Get ArgoCD Applications
         id: get-apps
         run: |
@@ -48,16 +53,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install ArgoCD CLI
-        run: |
-          curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-          chmod +x /usr/local/bin/argocd
-
       - name: Run ArgoCD Diff for ${{ matrix.app }}
         run: |
           echo ""
           echo "RUN: argocd app diff ${{ matrix.app }} --local ./argo-apps/${{ matrix.app }}"
-          argocd app diff ${{ matrix.app }} --local ./env/stage/${{ matrix.app }}
+          argocd --grpc-web --insecure app diff ${{ matrix.app }} --local ./env/stage/${{ matrix.app }}
         env:
-          ARGOCD_SERVER: http://argocd.check-this.link:80
+          ARGOCD_SERVER: http://argocd.check-this.link
           ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
