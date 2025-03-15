@@ -1,12 +1,14 @@
 # Full Argo diff before release
 # argocd app diff ${{ github.ref_name }}
+# argocd app diff argocd/example-app-nginx-example --local ./argo-apps/example-app/nginx-example
+
 
 name: ArgoCD Diff Before Deployment
 
 on:
   pull_request:
     branches:
-      - devel
+      - test
 
 jobs:
   argo-diff:
