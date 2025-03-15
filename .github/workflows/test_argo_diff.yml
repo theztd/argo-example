@@ -6,9 +6,7 @@ name: ArgoCD Diff Before Deployment
 on:
   pull_request:
     branches:
-      - prod
-      - staging
-      - dev
+      - devel
 
 jobs:
   argo-diff:
@@ -22,10 +20,38 @@ jobs:
           curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
           chmod +x /usr/local/bin/argocd
 
-      - name: Perform ArgoCD Diff
+  fetch-apps:
+    runs-on: ubuntu-latest
+    outputs:
+      apps: ${{ steps.get-apps.outputs.apps }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get ArgoCD Applications
+        id: get-apps
         run: |
-          argocd login ${{ secrets.ARGOCD_SERVER }} --auth-token ${{ secrets.ARGOCD_AUTH_TOKEN }}
-          argocd app diff ${{ github.ref_name }}
+          APPS=$(argocd app list -o name | jq -R -s -c 'split("\n")[:-1]')
+          echo "apps=$APPS" >> $GITHUB_ENV
         env:
-          ARGOCD_SERVER: ${{ secrets.ARGOCD_SERVER }}
+          ARGOCD_SERVER: http://argocd.check-this.link
+          ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
+
+  diff-apps:
+    needs: fetch-apps
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: ${{ fromJson(needs.fetch-apps.outputs.apps) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run ArgoCD Diff for ${{ matrix.app }}
+        run: |
+          echo ""
+          echo "RUN: argocd app diff ${{ matrix.app }} --local ./argo-apps/${{ matrix.app }}"
+          argocd app diff ${{ matrix.app }} --local ./env/stage/${{ matrix.app }}
+        env:
+          ARGOCD_SERVER: http://argocd.check-this.link
           ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}

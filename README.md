@@ -21,3 +21,15 @@ There are example scripts in ./init/ directory showing how to add automaticaly a
 ```
 
 ## Structure and workflow
+
+
+
+
+## How to contribute
+
+
+```bash
+# Compare local state with argo deployment
+argocd app diff argocd/example-app-nginx-example --local ./argo-apps/example-app/nginx-example
+
+```
