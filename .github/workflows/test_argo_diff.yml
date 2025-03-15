@@ -6,7 +6,11 @@
 name: ArgoCD Diff Before Deployment
 
 on:
-  pull_request:
+  # pull_request:
+  #   branches:
+  #     - test
+
+  push:
     branches:
       - test
 
