@@ -37,9 +37,6 @@ jobs:
           echo "apps=[\"$(echo $APPS | sed 's/ /\",\"/g')\"]" >> $GITHUB_ENV
           echo "apps=[\"$(echo $APPS | sed 's/ /\",\"/g')\"]" >> $GITHUB_OUTPUT
           popd
-        env:
-          ARGOCD_SERVER: http://argocd.check-this.link
-          ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
 
   diff-apps:
     needs: fetch-apps
@@ -62,5 +59,5 @@ jobs:
           echo "RUN: argocd app diff ${{ matrix.app }} --local ./argo-apps/${{ matrix.app }}"
           argocd app diff ${{ matrix.app }} --local ./env/stage/${{ matrix.app }}
         env:
-          ARGOCD_SERVER: http://argocd.check-this.link
+          ARGOCD_SERVER: http://argocd.check-this.link:80
           ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
