@@ -21,11 +21,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install ArgoCD CLI
-        run: |
-          curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-          chmod +x /usr/local/bin/argocd
-
   fetch-apps:
     runs-on: ubuntu-latest
     outputs:
@@ -34,11 +29,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Get ArgoCD Applications
+      - name: STAGE - Get ArgoCD Applications
         id: get-apps
         run: |
-          APPS=$(argocd app list -o name | jq -R -s -c 'split("\n")[:-1]')
-          echo "apps=$APPS" >> $GITHUB_ENV
+          pushd env/stage
+          for app in ./*/*/Chart.yml; do echo $app | awk -F'/' '{print $2"-"$3}'; done | xargs
+          echo "apps=[$(echo $APPS | sed 's/ /\",\"/g')]" >> $GITHUB_ENV
+          echo "::set-output name=apps::[$(echo $APPS | sed 's/ /\",\"/g')]"
+          popd
         env:
           ARGOCD_SERVER: http://argocd.check-this.link
           ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
@@ -52,6 +50,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Install ArgoCD CLI
+        run: |
+          curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x /usr/local/bin/argocd
 
       - name: Run ArgoCD Diff for ${{ matrix.app }}
         run: |
