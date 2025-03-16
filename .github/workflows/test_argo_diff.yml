@@ -33,7 +33,7 @@ jobs:
         id: get-apps
         run: |
           pushd env/stage
-          APPS=$(for app in ./*/*/Chart.yml; do echo $app | awk -F'/' '{print $2"-"$3}'; done | xargs)
+          APPS=$(for app in ./*/*/Chart.yml; do echo $app | awk -F'/' '{print $2"/"$3}'; done | xargs)
           echo "apps=[\"$(echo $APPS | sed 's/ /\",\"/g')\"]" >> $GITHUB_ENV
           echo "apps=[\"$(echo $APPS | sed 's/ /\",\"/g')\"]" >> $GITHUB_OUTPUT
           popd
@@ -55,9 +55,9 @@ jobs:
 
       - name: Run ArgoCD Diff for ${{ matrix.app }}
         run: |
-          echo ""
-          echo "RUN: argocd app diff ${{ matrix.app }} --local ./argo-apps/${{ matrix.app }}"
-          argocd --grpc-web --insecure app diff ${{ matrix.app }} --local ./env/stage/${{ matrix.app }}
+          APP_NAME=$(echo ${{ matrix.app }} | sed 's/\//-/g')
+          echo "RUN: argocd app diff ${APP_NAME} --local ./env/stage/${{ matrix.app }}"
+          argocd --grpc-web --insecure app diff ${APP_NAME} --local ./env/stage/${{ matrix.app }}
         env:
           ARGOCD_SERVER: argocd.check-this.link
           ARGOCD_AUTH_TOKEN: ${{ secrets.ARGOCD_AUTH_TOKEN }}
