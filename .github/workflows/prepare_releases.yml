@@ -20,7 +20,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Create Temporary Release Branch
+      - name: Create Temporary Release Branch STAGE
         env:
           TMP_BRANCH: "${{ github.ref_name }}_release-temp"
         run: |
@@ -28,10 +28,10 @@ jobs:
           # git pull origin main
           git checkout -B $TMP_BRANCH
           mkdir -p apps
-          mv env/prod/* apps/
+          mv env/stage/* apps/
           rm -rf env
           git add .
-          git commit -m "Automatická transformace: přesun ./env/prod do ./apps a smazání ./env"
+          git commit -m "Automatická transformace: přesun ./env/stage do ./apps a smazání ./env"
           git push origin $TMP_BRANCH --force
 
       - name: Create Pull Request
