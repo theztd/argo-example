@@ -19,15 +19,15 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git remote set-url origin https://x-access-token:${{ secrets.ACTIONS_PAT }}@github.com/${{ github.repository }}.git
+          git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN_RW }}@github.com/${{ github.repository }}.git
 
 
       - name: Create Temporary Release Branch STAGE
         env:
           TMP_BRANCH: "${{ github.ref_name }}_release-temp"
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_RW }}
         run: |
-          git remote set-url origin https://x-access-token:${{ secrets.ACTIONS_PAT }}@github.com/${{ github.repository }}.git
+          git remote set-url origin https://x-access-token:${{ secrets.GH_TOKEN_RW }}@github.com/${{ github.repository }}.git
 
           # git checkout main
           # git pull origin main
@@ -41,6 +41,6 @@ jobs:
 
       - name: Create Pull Request
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_RW }}
           TMP_BRANCH: "${{ github.ref_name }}_release-temp"
         run: gh pr create --base release --head r$TMP_BRANCH --title "Automatická synchronizace release" --body "Tato větev obsahuje aktualizovaný release obsah podle main."
